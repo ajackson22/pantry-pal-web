@@ -13,8 +13,7 @@ export interface AuthResponse {
     id: string;
     email: string;
   };
-  accessToken: string;
-  refreshToken: string;
+  token: string;
 }
 
 export interface SessionResponse {
@@ -26,25 +25,56 @@ export interface SessionResponse {
 
 class AuthService {
   private baseUrl: string;
+  private token: string | null = null;
 
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+    }
+  }
+
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    return headers;
+  }
+
+  private setToken(token: string): void {
+    this.token = token;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+    }
+  }
+
+  private clearToken(): void {
+    this.token = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
   }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/auth/login`, {
+    const response = await fetch(`${this.baseUrl}/auth/signin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
-      credentials: 'include',
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Login failed' }));
-      throw new Error(error.message || 'Failed to login');
+      const error = await response.json().catch(() => ({ error: 'Login failed' }));
+      throw new Error(error.error || error.message || 'Failed to login');
     }
 
-    return response.json();
+    const data = await response.json();
+    this.setToken(data.token);
+    return data;
   }
 
   async signup(credentials: SignupCredentials): Promise<AuthResponse> {
@@ -52,22 +82,25 @@ class AuthService {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
-      credentials: 'include',
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Signup failed' }));
-      throw new Error(error.message || 'Failed to create account');
+      const error = await response.json().catch(() => ({ error: 'Signup failed' }));
+      throw new Error(error.error || error.message || 'Failed to create account');
     }
 
-    return response.json();
+    const data = await response.json();
+    this.setToken(data.token);
+    return data;
   }
 
   async logout(): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/auth/logout`, {
+    const response = await fetch(`${this.baseUrl}/auth/signout`, {
       method: 'POST',
-      credentials: 'include',
+      headers: this.getHeaders(),
     });
+
+    this.clearToken();
 
     if (!response.ok) {
       throw new Error('Failed to logout');
@@ -75,29 +108,22 @@ class AuthService {
   }
 
   async getSession(): Promise<SessionResponse> {
-    const response = await fetch(`${this.baseUrl}/auth/session`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
+    if (!this.token) {
       return { user: null };
     }
 
-    return response.json();
-  }
-
-  async refreshSession(): Promise<AuthResponse> {
-    const response = await fetch(`${this.baseUrl}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
+    const response = await fetch(`${this.baseUrl}/auth/me`, {
+      method: 'GET',
+      headers: this.getHeaders(),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to refresh session');
+      this.clearToken();
+      return { user: null };
     }
 
-    return response.json();
+    const data = await response.json();
+    return { user: data.user };
   }
 
   async getGoogleAuthUrl(): Promise<{ url: string }> {
@@ -110,6 +136,10 @@ class AuthService {
     }
 
     return response.json();
+  }
+
+  getToken(): string | null {
+    return this.token;
   }
 }
 

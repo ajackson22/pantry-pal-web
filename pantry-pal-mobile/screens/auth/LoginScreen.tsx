@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { apiClient } from '../../lib/api-client';
+import { useAuth } from '../../providers/AuthProvider';
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const auth = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -14,14 +16,13 @@ export default function LoginScreen({ navigation }: any) {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const response = await apiClient.auth.signIn(email, password);
     setLoading(false);
 
-    if (error) {
-      Alert.alert('Login Failed', error.message);
+    if (response.error) {
+      Alert.alert('Login Failed', response.error);
+    } else if (response.data) {
+      await apiClient.setAuthToken(response.data.token);
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { apiClient } from '../../lib/api-client';
 
 export default function SignUpScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -20,15 +20,13 @@ export default function SignUpScreen({ navigation }: any) {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const response = await apiClient.auth.signUp(email, password);
     setLoading(false);
 
-    if (error) {
-      Alert.alert('Sign Up Failed', error.message);
-    } else {
+    if (response.error) {
+      Alert.alert('Sign Up Failed', response.error);
+    } else if (response.data) {
+      await apiClient.setAuthToken(response.data.token);
       Alert.alert('Success', 'Account created successfully!');
     }
   };

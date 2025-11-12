@@ -8,7 +8,7 @@ import { useAuth } from '../providers/AuthProvider';
 const Stack = createNativeStackNavigator();
 
 export function AppNavigator() {
-  const { session, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return null;
@@ -17,7 +17,7 @@ export function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {session ? (
+        {user ? (
           <Stack.Screen name="Main" component={MainTabNavigator} />
         ) : (
           <Stack.Screen name="Auth" component={AuthStackNavigator} />

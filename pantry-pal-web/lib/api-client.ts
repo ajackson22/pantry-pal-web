@@ -1,17 +1,14 @@
-import { Session } from '@supabase/supabase-js';
+import { authService } from './services/auth-service';
 
 export interface ApiClientConfig {
   baseUrl: string;
-  session: Session | null;
 }
 
 class ApiClient {
   private baseUrl: string;
-  private session: Session | null;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl;
-    this.session = config.session;
   }
 
   private async request<T>(
@@ -22,18 +19,22 @@ class ApiClient {
       'Content-Type': 'application/json',
     };
 
-    if (this.session?.access_token) {
-      headers['Authorization'] = `Bearer ${this.session.access_token}`;
+    const token = authService.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
-      headers,
+      headers: {
+        ...headers,
+        ...(options.headers as Record<string, string>),
+      },
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
+      const error = await response.json().catch(() => ({ error: 'Request failed' }));
+      throw new Error(error.error || error.message || `HTTP ${response.status}`);
     }
 
     return response.json();
@@ -57,8 +58,11 @@ class ApiClient {
     });
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  async delete<T>(endpoint: string, data?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'DELETE',
+      body: data ? JSON.stringify(data) : undefined,
+    });
   }
 
   async patch<T>(endpoint: string, data?: unknown): Promise<T> {
@@ -67,16 +71,11 @@ class ApiClient {
       body: data ? JSON.stringify(data) : undefined,
     });
   }
-
-  updateSession(session: Session | null) {
-    this.session = session;
-  }
 }
 
-export function createApiClient(session: Session | null): ApiClient {
+export function createApiClient(): ApiClient {
   return new ApiClient({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
-    session,
   });
 }
 

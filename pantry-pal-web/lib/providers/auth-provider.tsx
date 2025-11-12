@@ -47,13 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeAuth();
-
-    const interval = setInterval(() => {
-      refreshAuth();
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [refreshAuth]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
