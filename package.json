@@ -1,0 +1,23 @@
+{
+  "name": "pantry-pal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pantry Pal - Smart Pantry Management System",
+  "scripts": {
+    "dev": "npm run check-deps && concurrently -n backend,web -c blue,green \"npm run dev:backend\" \"npm run dev:web\"",
+    "check-deps": "test -d pantry-pal-backend/node_modules || (cd pantry-pal-backend && npm install) && test -d pantry-pal-web/node_modules || (cd pantry-pal-web && npm install)",
+    "dev:backend": "cd pantry-pal-backend && npm run dev",
+    "dev:web": "cd pantry-pal-web && npm run dev",
+    "dev:mobile": "cd pantry-pal-mobile && npm start",
+    "build": "npm run build:backend && npm run build:web",
+    "build:backend": "cd pantry-pal-backend && npm run build",
+    "build:web": "cd pantry-pal-web && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:web\"",
+    "start:backend": "cd pantry-pal-backend && npm start",
+    "start:web": "cd pantry-pal-web && npm start",
+    "install:all": "npm install && cd pantry-pal-backend && npm install && cd ../pantry-pal-web && npm install && cd ../pantry-pal-mobile && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

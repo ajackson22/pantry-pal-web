@@ -6,12 +6,31 @@ A comprehensive food management application with web and mobile interfaces.
 
 ```
 pantry-pal/
-├── pantry-pal-web/        # Next.js web application
-├── pantry-pal-mobile/     # React Native Expo mobile application
-└── pantry-pal-backend/    # Backend services (reserved)
+├── pantry-pal-backend/    # Next.js backend API (port 3000)
+├── pantry-pal-web/        # Next.js web application (port 3001)
+└── pantry-pal-mobile/     # React Native Expo mobile application
 ```
 
 ## Getting Started
+
+### Quick Start (All Services)
+
+```bash
+npm install
+npm run dev
+```
+
+This will start both the backend API (port 3000) and web application (port 3001) concurrently.
+
+### Backend API
+
+```bash
+cd pantry-pal-backend
+npm install
+npm run dev
+```
+
+The backend API will be available at `http://localhost:3000`
 
 ### Web Application
 
@@ -35,16 +54,22 @@ Follow the Expo CLI instructions to run on iOS, Android, or web.
 
 ## Environment Variables
 
-Both applications require Supabase configuration:
+### Backend (.env in pantry-pal-backend/)
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
 ### Web (.env in pantry-pal-web/)
 ```
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### Mobile (.env in pantry-pal-mobile/)
 ```
+EXPO_PUBLIC_API_URL=http://localhost:3000
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```

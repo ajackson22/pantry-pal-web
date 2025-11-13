@@ -1,3 +1,18 @@
 {
-  "template": "nextjs-shadcn"
+  "projectType": "monorepo",
+  "previewApp": "web",
+  "apps": {
+    "web": {
+      "path": "pantry-pal-web",
+      "port": 3001,
+      "dev": "npm run dev",
+      "build": "npm run build"
+    },
+    "backend": {
+      "path": "pantry-pal-backend",
+      "port": 3000,
+      "dev": "npm run dev",
+      "build": "npm run build"
+    }
+  }
 }
