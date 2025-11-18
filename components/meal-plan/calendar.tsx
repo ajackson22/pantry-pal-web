@@ -113,9 +113,7 @@ export function MealPlanCalendar({
                       className={`cursor-pointer text-xs ${getMealTypeColor(meal.mealType)}`}
                       onClick={() => onMealClick(meal)}
                     >
-                      {meal.recipeName.length > 15
-                        ? meal.recipeName.substring(0, 15) + '...'
-                        : meal.recipeName}
+                      {meal.recipeName.substring(0, 15) + '...'}
                     </Badge>
                   ))}
                 </div>
