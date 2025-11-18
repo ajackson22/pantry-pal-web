@@ -1,9 +1,0 @@
-Pantry Pal - Smart Pantry Management System
-
-This is a monorepo project with:
-- Backend API (pantry-pal-backend) on port 3000
-- Web Application (pantry-pal-web) on port 3001
-- Mobile Application (pantry-pal-mobile) using Expo
-
-The preview shows the web application, which connects to the backend API.
-All authentication flows through the backend API, which uses Supabase for data storage.
